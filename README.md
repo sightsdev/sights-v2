@@ -1,7 +1,7 @@
 # SIGHTS v2
 
 > [!WARNING]
-> SIGHTS v2 is still in beta
+> SIGHTS v2 is still in beta\
 > Expect bugs and breaking changes untill a stable release
 
 The next generation of the [SIGHTS](https://github.com/sightsdev/sights) Project, redesigned from the ground up to address the steep learning curve, outdated framework and difficult extensibility of original SIGHTS.
@@ -10,9 +10,9 @@ It presently makes a number of core design decisions different to SIGHTS includi
 
 Build on a modern stack: Svelte (with tailwindcss) on the frontend and Starlette/FastAPI (Python) on the backend. The frontend uses endpoints generated from the backend using openapi.
 
-## Docs
+### Docs
 
-Documentation is avaliable [here](https://sightsdev.github.io/docs/sights)
+Documentation is available [here](https://sightsdev.github.io/docs/sights).
 
 ### Quick start
 
