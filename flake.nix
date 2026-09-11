@@ -1,21 +1,45 @@
 {
-  description = "SIGHTS Flake";
+  description = "SIGHTS Development Environment";
+
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  outputs = { nixpkgs, ... }: let pkgs = nixpkgs.legacyPackages.x86_64-linux; in {
-    devShells.x86_64-linux.default = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        python3
-        python3Packages.virtualenv
-        uv
-        nodejs
-        yarn
-        ffmpeg
-      ];
-      shellHook = ''
-        export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.libGL}/lib:${pkgs.glib.out}/lib:${pkgs.zlib}/lib:$LD_LIBRARY_PATH"
-        uv sync --project server
-        yarn install --ignore-engines
-      '';
+
+  outputs = { self, nixpkgs }:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+    in
+    {
+      devShells.${system}.default = pkgs.mkShell {
+        buildInputs = with pkgs; [
+          python3
+          uv
+          nodejs
+          corepack
+          tmux
+          stdenv.cc.cc.lib
+          libGL
+          glib
+          zlib
+          ruff
+        ];
+
+        shellHook = ''
+          export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [
+            pkgs.stdenv.cc.cc.lib
+            pkgs.libGL
+            pkgs.glib
+            pkgs.zlib
+          ]}:$LD_LIBRARY_PATH"
+
+          echo == Python Deps ==
+          cd server
+          uv sync
+          echo == JS Deps ==
+          cd ../
+          yarn
+        '';
+      };
     };
-  };
 }
+
+# ttyd -p 8001 ssh localhost

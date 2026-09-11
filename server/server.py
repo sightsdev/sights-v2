@@ -1,94 +1,34 @@
-import json
 import logging
-import shutil
-import os
-import glob
-from typing import Optional
 from pathlib import Path
 from time import time
-from datetime import datetime
+from typing import cast
 
-try:
-    import tomllib as toml
-except ModuleNotFoundError:
-    import tomli as toml
-from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import HTTPException
 from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel, Field
+from starlette.types import ASGIApp
 
-from components.camera import CameraComponent, CameraParameters
-from components.drive import DummyConnection, SimpleSerialConnection
-from components.sensor import SensorConfig, Sensor
-from components.state import State
-from components.arm import Arm, ArmConfig
-from sensors.mlx90614 import MLX90614Sensor, MLX90614SensorConfig
-from sensors.random_sensor import RandomSensor, RandomSensorConfig
-from sensors.system_info import SystemInfo, SystemInfoConfig
-from sensors.sgp30 import SGP30SensorConfig, SGP30Sensor
-from sensors.mlx90640 import MLX90640Sensor, MLX90640SensorConfig
-from sensors.mlx90641 import MLX90641Sensor, MLX90641SensorConfig
+from components.camera import CameraComponent
+from components.sensor import SensorConfig
+from util.configs import LOG_FILE, ConfigManager
 from util.helpers import SinglePageApplication
+from util.logging import setup_logging
+from util.state import State, load_state
 
-logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.INFO)
+# Init
+
+setup_logging()
 logger = logging.getLogger(__name__)
 
-sensorRegister = {
-    "mlx90614": (MLX90614Sensor, MLX90614SensorConfig),
-    "mlx90640": (MLX90640Sensor, MLX90640SensorConfig),
-    "mlx90641": (MLX90641Sensor, MLX90641SensorConfig),
-    "random": (RandomSensor, RandomSensorConfig),
-    "sgp30": (SGP30Sensor, SGP30SensorConfig),
-    "system_info": (SystemInfo, SystemInfoConfig)
-}
-
-
-def load_state() -> State:
-    new_state: State = State()
-    with open("settings.toml", mode="rb") as fp:
-        config = toml.load(fp)
-
-    if config["drive"]["enabled"]:
-        new_state.drive = SimpleSerialConnection(
-            port=config["drive"]["connection"]["port"],
-            baudrate=config["drive"]["connection"]["baudrate"],
-            channels=config["drive"]["channels"]
-        )
-    else:
-        new_state.drive = DummyConnection()
-
-    new_state.arm = Arm(ArmConfig(**config["arm"]))
-
-    for label, index in config["camera"]["devices"].items():
-        camera_config = CameraParameters(
-            id=label,
-            width=config["camera"]["width"],
-            height=config["camera"]["height"],
-            framerate=config["camera"]["framerate"],
-            quality=config["camera"]["quality"],
-            source=index)
-        new_state.cameras[label] = camera_config
-
-    for label in config["sensors"]:
-        # Load sensor configuration as a dict
-        conf: dict = config["sensors"][label]
-        # Find the respective Sensor and SensorConfig class from the register
-        sensor_class, sensor_config_class = sensorRegister[conf["type"]]
-        # Create the SensorConfig object containing the configuration settings for the sensor
-        conf_obj: SensorConfig = sensor_config_class(**conf)
-        new_state.sensors[label] = sensor_class(conf_obj)
-        # Run initial configuration for the sensor
-        if conf_obj.enabled:
-            new_state.sensors[label].configure()
-        logger.info(f"Created sensor of type {conf['type']}")
-
-    return new_state
-
-
 app = FastAPI(debug=False)
-app.state = load_state()
+app.state.data = load_state()
+
+
+def get_state() -> State:
+    return cast(State, app.state.data)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -96,104 +36,263 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 api = FastAPI()
-app.mount("/api/camera/{id:str}", CameraComponent.stream)
+
+config_manager = ConfigManager()
+
+# Frontend
+app.mount("/api/camera/{id:str}", cast(ASGIApp, CameraComponent.stream))
 app.mount("/api", api, name="api")
-app.mount("/docs/", SinglePageApplication(directory="../docs/.vitepress/dist"), name="docs")
-app.mount("/", SinglePageApplication(directory="../client/dist"), name="frontend")
+app.mount("/", SinglePageApplication(directory="../client/build"), name="frontend")
 
-'''
-Quick note re: endpoints using async def or def
-Intensive synchronous operations (such as get/set_settings) should (probably) be synchronous functions. FastAPI will spin these out to a new thread.
-Asynchronous functions should be async of course as well as any non-intensive synchronous functions. https://fastapi.tiangolo.com/async/
-'''
-@api.get("/camera/")
-async def list_cameras() -> list[str]:
-    return list(app.state.cameras.keys())
+# Pydantic Classes
 
-@api.get("/camera/all")
-def list_available_cameras() -> list[int]:
-    return CameraComponent.list_available()
 
 class MoveMotorsParams(BaseModel):
     speed: list[int]
 
-@api.post("/drive/")
-async def drive(params: MoveMotorsParams):
-    app.state.drive.move(params.speed)
-
-@api.post("/drive/stop")
-async def drive_stop():
-    app.state.drive.stop()
-
-@api.get("/sensor/list/")
-async def sensor_list() -> dict[str, SensorConfig]:
-    return {k: s.config for (k, s) in app.state.sensors.items()}
-
-@api.get("/sensor/{sensor_id}")
-async def sensor(sensor_id: str):
-    if sensor_id not in app.state.sensors.keys():
-        raise HTTPException(404, f"Sensor with ID of {sensor_id} not found")
-    #print("New request for " + sensor_id)
-    return app.state.sensors[sensor_id].read()
 
 class MoveArmServoParams(BaseModel):
     direction: bool
-    amount: Optional[float] = None
+    amount: float = 1.8
 
-@api.post("/arm/servo/{servo_name}")
-async def arm_move(servo_name: str, params: MoveArmServoParams):
-    app.state.arm.increment_angle(servo_name, params.direction, params.amount)
 
-@api.post("/arm/home")
-async def arm_home():
-    await app.state.arm.home()
+class SwitchConfigBody(BaseModel):
+    file: str = Field(..., pattern=r"^[^/\\\.]+\.toml$")
 
-@api.post("/arm/preset/{preset}")
-async def arm_home(preset: str):
-    await app.state.arm.move_preset(preset)
 
-@api.post("/poweroff")
-async def power():
-    print("Powering off...")
-    #os.system('poweroff')
-
-@api.post("/reboot")
-async def reboot():
-    print("Rebooting...")
-    #os.system('reboot')
-
-@api.post("/reload")
-def reload():
-    app.state.drive.close()
-    app.state = load_state()
-
-@api.get("/settings")
-async def get_settings() -> str:
-    with open("settings.toml", mode="r") as fp:
-        return fp.read()
-
-class PostSettingsBody(BaseModel):
+class UpdateConfigBody(BaseModel):
     content: str
 
-@api.post("/settings")
-def set_settings(body: PostSettingsBody):
-    shutil.copy2('settings.toml', 'settings.toml.bak')
-    with open("settings.toml", mode="w") as fp:
-        fp.write(body.content)
-    reload()
+
+VERSION_FILE = Path(__file__).parent / "VERSION"
+
+
+@api.get("/version", response_class=PlainTextResponse)
+async def get_version() -> str:
+    """Get the current version."""
+    try:
+        return VERSION_FILE.read_text().strip()
+    except FileNotFoundError:
+        return "Unknown"
+    except OSError as e:
+        logger.error(f"Error reading version file: {e}")
+        return "Unknown"
+
+
+# Camera
+
+
+@api.get("/camera/")
+async def list_cameras() -> list[str]:
+    """List all configured cameras."""
+    return list(get_state().cameras.keys())
+
+
+@api.get("/camera/all")
+def list_available_cameras() -> list[int]:
+    """List all avaliable cameras currently on the host system"""
+    return CameraComponent.list_available()
+
+
+# Drive
+
+
+@api.post("/drive/")
+async def drive(params: MoveMotorsParams) -> None:
+    """Move drive motors at provided speed"""
+    state = get_state()
+    if state.drive is not None:
+        state.drive.move(params.speed)
+    else:
+        logger.warning("Drive move was triggered, but there is no drive plugin")
+
+
+@api.post("/drive/stop")
+async def drive_stop() -> None:
+    """Stop all drive motors."""
+    state = get_state()
+    if state.drive is not None:
+        state.drive.stop()
+    else:
+        logger.warning("Drive stop was triggered, but there is no drive plugin")
+
+
+# Sensors
+
+
+@api.get("/sensor/list/")
+async def sensor_list() -> dict[str, SensorConfig]:
+    """List all available sensors and their configurations."""
+    return {
+        k: s.config
+        for k, s in get_state().sensors.items()
+        if isinstance(s.config, SensorConfig)
+    }
+
+
+@api.get("/sensor/{sensor_id}")
+async def sensor_read(sensor_id: str):
+    """Read data from a specific sensor."""
+    state = get_state()
+    if sensor_id not in state.sensors:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Sensor with ID of {sensor_id} not found",
+        )
+    return state.sensors[sensor_id].read()
+
+
+# Arm
+
+
+@api.post("/arm/servo/{servo_name}")
+async def arm_move(servo_name: str, params: MoveArmServoParams) -> None:
+    """Move a specific servo on the arm."""
+    state = get_state()
+    if state.arm is not None:
+        state.arm.increment_angle(servo_name, params.direction, params.amount)
+    else:
+        logger.warning("Arm movement was triggered, but there is no arm plugin")
+
+
+@api.post("/arm/home")
+async def arm_home() -> None:
+    """Move arm to home position."""
+    state = get_state()
+    if state.arm is not None:
+        await state.arm.home()
+    else:
+        logger.warning("Arm movement was triggered, but there is no arm plugin")
+
+
+@api.post("/arm/preset/{preset}")
+async def arm_preset(preset: str) -> None:
+    """Move arm to a preset position."""
+    state = get_state()
+    if state.arm is not None:
+        await state.arm.move_preset(preset)
+    else:
+        logger.warning("Arm movement was triggered, but there is no arm plugin")
+
+
+# Host system
+
+
+@api.post("/poweroff")
+async def power() -> dict[str, str]:
+    """Power off the system."""
+    logger.info("Powering off...")
+    # os.system('poweroff')
+    return {"status": "powering off"}
+
+
+@api.post("/reboot")
+async def reboot() -> dict[str, str]:
+    """Reboot the system."""
+    logger.info("Rebooting...")
+    # os.system('reboot')
+    return {"status": "rebooting"}
+
+
+@api.post("/reload")
+def reload() -> dict[str, bool]:
+    """Reload the application state from configuration."""
+    state = get_state()
+    if state.drive is not None:
+        state.drive.close()
+    app.state.data = load_state()
+    return {"success": True}
+
 
 @api.get("/logs", response_class=PlainTextResponse)
-async def get_logs():
-    log_file = Path.home() / ".cache" / "sights-log.txt"
+async def get_logs() -> str:
+    """App log file"""
     try:
-        with open(log_file, 'r') as f:
-            return f.read()
+        return LOG_FILE.read_text()
     except FileNotFoundError:
         return "Log file not found"
-    except Exception as e:
-        return f"Error reading log file: {str(e)}"
+    except OSError as e:
+        return f"Error reading log file: {e}"
+
 
 @api.get("/ping")
-def ping_endpoint():
+def ping_endpoint() -> dict[str, float]:
+    """Returns the current network delay (aka ping)"""
     return {"timestamp": time() * 1000}
+
+
+@api.post("/estop")
+async def estop() -> dict[str, str]:
+    """Emergency Stop - Use at own risk"""
+    logger.info("Emergency stopping...")
+    # os.system('poweroff -p -f')
+    return {"status": "stopping"}
+
+
+# Configuration
+
+
+@api.get("/config/active")
+async def get_active_config() -> dict[str, str]:
+    """Get the currently active config file name."""
+    return {"active_config_file": config_manager.get_active_config_name()}
+
+
+@api.get("/config/list")
+async def list_configs() -> dict[str, list[str]]:
+    """List all available config files."""
+    return {"configs": config_manager.list_config_files()}
+
+
+@api.get("/config/file")
+async def get_config_file() -> dict[str, str]:
+    """Get the contents of the currently active config file."""
+    config_path = config_manager.get_active_config_path()
+
+    if not config_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Config file not found: {config_path.name}",
+        )
+
+    try:
+        return {"content": config_path.read_text(), "filename": config_path.name}
+    except OSError as e:
+        logger.error(f"Error reading config: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error reading config file: {e}",
+        )
+
+
+@api.get("/config/backups")
+async def list_backups() -> (
+    dict[str, str | None] | dict[str, list[dict[str, str | int]] | str]
+):
+    print(config_manager.list_backups())
+    """List all backup files for the currently active config."""
+    return config_manager.list_backups()
+
+
+@api.get("/config/backup/{filename}")
+async def get_backup_file(filename: str) -> dict[str, str]:
+    """Get the contents of a specific backup file."""
+    return config_manager.get_backup_content(filename)
+
+
+@api.post("/config/switch")
+def switch_config(body: SwitchConfigBody) -> dict[str, bool]:
+    """Switch to a different configuration file."""
+    config_manager.switch_config(body.file)
+    _ = reload()
+    return {"success": True}
+
+
+@api.post("/config/update")
+def update_config(body: UpdateConfigBody) -> dict[str, bool]:
+    """Update the current configuration file."""
+    config_manager.update_config(body.content)
+    _ = reload()
+    return {"success": True}

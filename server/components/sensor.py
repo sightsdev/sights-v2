@@ -1,20 +1,19 @@
-import logging
+from abc import ABC, abstractmethod
+
 from pydantic import BaseModel
 
+
 class SensorConfig(BaseModel):
-    enabled: bool
-    type: str
+    enabled: bool = False
+    mock: bool = False
 
-# Base class for sensor
-class Sensor:
-    def __init__(self, config):
-        self.logger = logging.getLogger(__name__)
-        self.config = config
-        
-    # The main initialization method that is called after the object has been created
-    # Should be overriden by the inheriting class. Called only if enabled.
-    def configure(self):
-        pass
 
-    def read(self):
+class Sensor(ABC):
+    def __init__(self, config: SensorConfig):
+        self.config: SensorConfig = config
+        self.enabled: bool = config.enabled
+        self.mock: bool = config.mock
+
+    @abstractmethod
+    def read(self) -> dict[str, int] | None:
         pass

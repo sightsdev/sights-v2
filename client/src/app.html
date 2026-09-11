@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="/favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>SIGHTS Interface</title>
+
+		<style>
+			html {
+				background-color: #ffffff;
+			}
+			html.dark {
+				background-color: #171717;
+			}
+		</style>
+
+		<script>
+			(function () {
+				try {
+					const mode = localStorage.getItem('theme-mode') || 'system';
+					let isDark = false;
+
+					if (mode === 'dark') {
+						isDark = true;
+					} else if (mode === 'light') {
+						isDark = false;
+					} else {
+						// system mode
+						isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					}
+
+					if (isDark) {
+						document.documentElement.classList.add('dark');
+					}
+				} catch (e) {
+					// If localStorage fails, default to system preference
+					if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+						document.documentElement.classList.add('dark');
+					}
+				}
+			})();
+		</script>
+
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

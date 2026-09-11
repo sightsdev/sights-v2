@@ -1,76 +1,54 @@
 {
-  "name": "sights",
-  "version": "2.0.0-unstable",
-  "description": "A complete teleoperative robot control interface",
+  "name": "sights-v2",
   "private": true,
+  "version": "2.0.0-unstable",
   "type": "module",
   "scripts": {
-    "sights:dev": "vite client",
-    "sights:build": "tsc --project client && vite build client",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "generate-client": "openapi --input http://127.0.0.1:8000/api/openapi.json --output ./client/src/api --client axios --name AppClient",
-    "ts:format": "prettier --write '**/*.{tsx,ts,js}'",
-    "ts:check": "tsc --project client --noEmit"
-  },
-  "proxy": "http://127.0.0.1:8000",
-  "dependencies": {
-    "@headlessui/react": "^2.2.8",
-    "@tailwindcss/vite": "^4.1.13",
-    "@types/node": "^24.3.1",
-    "@types/prismjs": "^1.26.5",
-    "@types/react": "^18.2.14",
-    "@types/react-dom": "^18.2.6",
-    "@vitejs/plugin-react-swc": "^4.0.1",
-    "axios": "^1.4.0",
-    "chart.js": "^4.5.0",
-    "form-data": "^4.0.4",
-    "prettier": "^3.6.2",
-    "prism-themes": "^1.9.0",
-    "prismjs": "^1.30.0",
-    "react": "^18.2.0",
-    "react-chartjs-2": "^5.2.0",
-    "react-circular-progressbar": "^2.1.0",
-    "react-dom": "^18.2.0",
-    "react-hot-toast": "^2.4.1",
-    "react-hotkeys-hook": "^4.4.0",
-    "react-icons": "^4.10.1",
-    "react-simple-code-editor": "^0.14.1",
-    "ts-key-enum": "^2.0.12",
-    "typescript": "^5.6.0",
-    "usehooks-ts": "^2.9.1",
-    "vite": "^7.1.5",
-    "vite-plugin-svgr": "^4.5.0",
-    "vite-tsconfig-paths": "^5.1.4",
-    "web-vitals": "^2.1.4"
+    "sights:dev": "cd client && vite dev",
+    "sights:build": "cd client && vite build",
+    "sights:preview": "cd client && vite preview",
+    "sights:genclient": "openapi --input http://127.0.0.1:8000/api/openapi.json --output ./client/src/lib/api --client axios --name AppClient",
+    "ts:check": "cd client && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "ts:format": "cd client && prettier --write .",
+    "ts:lint": "cd client && prettier --check . && eslint ."
   },
   "devDependencies": {
+    "@eslint/compat": "^1.4.0",
+    "@eslint/js": "^9.36.0",
+    "@sveltejs/adapter-static": "^3.0.9",
+    "@sveltejs/kit": "^2.43.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.0",
+    "@tailwindcss/vite": "^4.1.13",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "^22",
+    "daisyui": "^5.3.9",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.12.4",
+    "globals": "^16.4.0",
     "openapi-typescript-codegen": "^0.29.0",
-    "react-router-dom": "^6.14.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-svelte": "^3.4.0",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "rollup-plugin-visualizer": "^6.0.5",
+    "svelte": "^5.39.5",
+    "svelte-check": "^4.3.2",
     "tailwindcss": "^4.1.13",
-    "terser": "^5.44.0",
-    "vitepress": "^2.0.0-alpha.12",
-    "vue": "^3.5.21"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1",
+    "vite": "^7.1.7"
   },
-  "eslintConfig": {
-    "env": {
-      "vitest/globals": true
-    }
+  "dependencies": {
+    "@floating-ui/dom": "^1.6.0",
+    "@internationalized/date": "^3.8.1",
+    "@lucide/svelte": "^1.43.0",
+    "axios": "^1.12.2",
+    "depcheck": "^1.4.7",
+    "melt": "^0.41.0",
+    "prism-code-editor": "^4.1.0",
+    "prism-themes": "^1.9.0",
+    "prismjs": "^1.30.0",
+    "uplot": "^1.6.32"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  }
+  "packageManager": "yarn@4.18.0"
 }
