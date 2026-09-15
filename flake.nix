@@ -11,7 +11,7 @@
     {
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = with pkgs; [
-          python3
+          python313
           uv
           nodejs
           corepack
@@ -41,5 +41,3 @@
       };
     };
 }
-
-# ttyd -p 8001 ssh localhost
