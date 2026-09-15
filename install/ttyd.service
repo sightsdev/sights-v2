@@ -1,0 +1,12 @@
+[Unit]
+Description=ttyd - Share your terminal over the web
+After=sshd.target
+[Service]
+RestartSec=2s
+Type=simple
+User=root
+Group=root
+ExecStart=ttyd -p 8001 ssh localhost
+Restart=always
+[Install]
+WantedBy=multi-user.target
