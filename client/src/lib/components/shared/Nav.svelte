@@ -79,8 +79,8 @@
 	const speedProgress = $derived(($currentSpeed / 8) * 100);
 	const speedColor = $derived.by(() => {
 		if ($currentSpeed >= 8) return 'bg-red-500 text-red-700 dark:text-red-400';
-		if ($currentSpeed >= 7) return 'bg-yellow-500 text-yellow-700 dark:text-yellow-400';
-		return 'bg-sky-500 text-sky-700 dark:text-sky-400';
+		if ($currentSpeed >= 6) return 'bg-yellow-500 text-yellow-700 dark:text-yellow-400';
+		return 'bg-green-500 text-green-700 dark:text-green-400';
 	});
 
 	// Systen Info
@@ -93,7 +93,7 @@
 	const connectionColor = $derived.by(
 		() =>
 			({
-				connected: 'text-sky-600 dark:text-sky-500',
+				connected: 'text-orange-600 dark:text-orange-500',
 				connecting: 'text-yellow-600 dark:text-yellow-500',
 				disconnected: 'text-red-600 dark:text-red-500'
 			})[systemStore.connectionStatus] || 'text-gray-600 dark:text-gray-400'
@@ -301,20 +301,20 @@
 			<!-- Left -->
 			<div class="flex flex-1 items-center gap-3 overflow-hidden">
 				<div class="hidden items-center gap-3 overflow-hidden text-sm lg:flex">
-					<div class="flex items-center gap-1 {cpuColor} flex-shrink-0" title="CPU Usage">
+					<div class="flex items-center gap-1 {cpuColor} shrink-0" title="CPU Usage">
 						<Cpu size={15} />
 						<span class="inline-block font-mono tabular-nums text-right min-w-[3ch]">
 							{systemStore.cpuPercent.toFixed(0)}%
 						</span>
 					</div>
-					<div class="flex items-center gap-1 {tempColor} flex-shrink-0" title="CPU Temperature">
+					<div class="flex items-center gap-1 {tempColor} shrink-0" title="CPU Temperature">
 						<Thermometer size={15} />
 						<span class="inline-block font-mono tabular-nums text-right min-w-[4ch]">
 							{systemStore.temperature?.toFixed(0) ?? '--'}°C
 						</span>
 					</div>
 					<div
-						class="flex items-center gap-1 {ramColor} flex-shrink-0"
+						class="flex items-center gap-1 {ramColor} shrink-0"
 						title="RAM Usage: {systemStore.memoryPercent.toFixed(0)}%"
 					>
 						<MemoryStick size={15} />
@@ -323,7 +323,7 @@
 						</span>
 					</div>
 					<div
-						class="flex items-center gap-1 {diskColor} flex-shrink-0"
+						class="flex items-center gap-1 {diskColor} shrink-0"
 						title="Disk Usage: {systemStore.diskPercent.toFixed(0)}%"
 					>
 						<HardDrive size={15} />
@@ -332,7 +332,7 @@
 						</span>
 					</div>
 					<div
-						class="flex flex-shrink-0 items-center gap-1 text-gray-600 dark:text-gray-400"
+						class="flex shrink-0 items-center gap-1 text-gray-600 dark:text-gray-400"
 						title="Uptime"
 					>
 						<ClockArrowUp size={15} />
@@ -342,11 +342,11 @@
 					</div>
 				</div>
 
-				<div class="hidden h-6 w-px flex-shrink-0 bg-gray-300 lg:block dark:bg-neutral-700"></div>
+				<div class="hidden h-6 w-px shrink-0 bg-gray-300 lg:block dark:bg-neutral-700"></div>
 
 				<div class="hidden items-center gap-3 overflow-hidden lg:flex">
 					<div
-						class="flex flex-shrink-0 items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400"
+						class="flex shrink-0 items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400"
 						title="UTC Time"
 					>
 						<Clock size={16} />
@@ -354,9 +354,9 @@
 					</div>
 
 					<button
-						class="flex flex-shrink-0 items-center gap-1.5 text-sm transition-colors {timerRunning
+						class="flex shrink-0 items-center gap-1.5 text-sm transition-colors {timerRunning
 							? 'text-green-600 dark:text-green-500'
-							: 'text-gray-600 dark:text-gray-400'} hover:text-sky-600 dark:hover:text-sky-500"
+							: 'text-gray-600 dark:text-gray-400'} hover:text-orange-600 dark:hover:text-orange-500"
 						title="Timer (Press T)"
 						onclick={toggleTimer}
 					>
@@ -367,7 +367,7 @@
 			</div>
 
 			<!-- Center -->
-			<div class="flex flex-shrink-0 justify-center">
+			<div class="flex shrink-0 justify-center">
 				<button
 					onclick={() => popups.open('about')}
 					class="whitespace-nowrap transition-opacity hover:opacity-80"
@@ -379,7 +379,7 @@
 
 			<!-- Right -->
 			<div class="flex flex-1 items-center justify-end gap-2">
-				<div class="speed-menu relative flex-shrink-0">
+				<div class="speed-menu relative shrink-0">
 					<button
 						class="relative h-8.5 w-18 overflow-hidden rounded-md border border-gray-300 px-3 py-1.5 transition-all hover:border-gray-400 dark:border-neutral-600 dark:hover:border-neutral-500"
 						title="Drive Speed"
@@ -434,9 +434,9 @@
 											$currentSpeed
 												? $currentSpeed >= 8
 													? 'bg-red-500'
-													: $currentSpeed >= 7
+													: $currentSpeed >= 6
 														? 'bg-yellow-500'
-														: 'bg-sky-500'
+														: 'bg-green-500'
 												: 'bg-gray-300 dark:bg-neutral-600'}"
 											onclick={() => selectSpeed(speed)}
 											title="Speed {speed}"
@@ -448,7 +448,7 @@
 					{/if}
 				</div>
 
-				<div class="config-menu relative flex-shrink-0">
+				<div class="config-menu relative shrink-0">
 					<Button
 						variant="outline"
 						size="md"
@@ -459,7 +459,7 @@
 						title="Configuration"
 					>
 						<FileCode size={16} />
-						<span class="hidden max-w-[100px] min-w-[100px] truncate text-xs lg:inline"
+						<span class="hidden max-w-25 min-w-25 truncate text-xs lg:inline"
 							>{formatConfigName(currentConfig)}</span
 						>
 						<ChevronDown
@@ -482,7 +482,7 @@
 										<button
 											class="flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-neutral-700 {config ===
 											currentConfig
-												? 'bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-400'
+												? 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400'
 												: 'text-gray-700 dark:text-gray-300'}"
 											onclick={() => switchConfig(config)}
 										>
@@ -498,9 +498,9 @@
 					{/if}
 				</div>
 
-				<div class="h-6 w-px flex-shrink-0 bg-gray-300 dark:bg-neutral-700"></div>
+				<div class="h-6 w-px shrink-0 bg-gray-300 dark:bg-neutral-700"></div>
 
-				<div class="flex flex-shrink-0 items-center gap-1">
+				<div class="flex shrink-0 items-center gap-1">
 					<Button variant="ghost" size="md" onclick={() => popups.open('terminal')} title="Terminal"
 						><Terminal size={18} /></Button
 					>
@@ -518,9 +518,9 @@
 					>
 				</div>
 
-				<div class="h-6 w-px flex-shrink-0 bg-gray-300 dark:bg-neutral-700"></div>
+				<div class="h-6 w-px shrink-0 bg-gray-300 dark:bg-neutral-700"></div>
 
-				<div class="power-menu relative flex-shrink-0">
+				<div class="power-menu relative shrink-0">
 					<Button
 						variant="danger"
 						size="md"

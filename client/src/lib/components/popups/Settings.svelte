@@ -204,12 +204,12 @@
 											onclick={() => switchConfig(config)}
 											class="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 dark:hover:bg-neutral-700 {config ===
 											currentConfig
-												? 'bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-400'
+												? '-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400'
 												: 'text-gray-700 dark:text-gray-300'}"
 										>
 											<span class="truncate">{formatConfigName(config)}</span>
 											{#if config === currentConfig}
-												<div class="h-2 w-2 rounded-full bg-sky-600"></div>
+												<div class="h-2 w-2 rounded-full bg-orange-600"></div>
 											{/if}
 										</button>
 									{/each}
@@ -331,7 +331,7 @@
 					<button
 						onclick={saveSettings}
 						disabled={loading}
-						class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed"
+						class="rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						Save Configuration
 					</button>

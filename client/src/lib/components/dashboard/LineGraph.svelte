@@ -245,7 +245,7 @@
 					<p class="text-sm text-red-600 dark:text-red-400">{error}</p>
 					<button
 						onclick={fetchData}
-						class="mt-2 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+						class="mt-2 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400"
 					>
 						Retry
 					</button>
@@ -263,7 +263,7 @@
 			>
 				<div class="text-center">
 					<div
-						class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-r-transparent"
+						class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-r-transparent"
 					></div>
 					<p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading...</p>
 				</div>

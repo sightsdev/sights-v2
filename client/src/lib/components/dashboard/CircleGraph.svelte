@@ -95,7 +95,7 @@
 	<div class="mb-3 flex items-center justify-between flex-shrink-0">
 		<h5 class="text-sm font-medium text-gray-900 dark:text-white">{title}</h5>
 		{#if loading}
-			<div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
+			<div class="h-2 w-2 rounded-full bg-orange-500 animate-pulse"></div>
 		{/if}
 	</div>
 	<div class="flex-1 flex items-center justify-center">
@@ -104,7 +104,7 @@
 				<p class="text-sm text-red-600 dark:text-red-400">{error}</p>
 				<button
 					onclick={fetchData}
-					class="mt-2 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+					class="mt-2 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400"
 				>
 					Retry
 				</button>

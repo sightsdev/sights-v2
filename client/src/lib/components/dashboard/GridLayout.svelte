@@ -537,12 +537,12 @@
 				class="widget-container absolute"
 				class:cursor-move={$isEditMode}
 				class:ring-2={$isEditMode && focusedWidgetId === item.id}
-				class:ring-blue-500={$isEditMode && focusedWidgetId === item.id}
+				class:ring-orange-500={$isEditMode && focusedWidgetId === item.id}
 				style="left: {xPx}px; top: {yPx}px; width: {wPx}px; height: {hPx}px;"
 			>
 				{#if $isEditMode}
 					<div
-						class="pointer-events-none absolute inset-0 z-10 rounded-lg border-2 border-blue-400 dark:border-blue-500"
+						class="pointer-events-none absolute inset-0 z-10 rounded-lg border-2 border-orange-400 dark:border-orange-500"
 					></div>
 
 					<div class="absolute left-2 right-2 top-2 z-20 flex justify-center">
@@ -640,7 +640,7 @@
 					<button
 						onclick={createProfile}
 						disabled={!newProfileName.trim()}
-						class="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+						class="rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Create
 					</button>
@@ -654,7 +654,7 @@
 					</div>
 					<button
 						onclick={importProfile}
-						class="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/20"
+						class="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/20"
 					>
 						<Upload size={14} /> Import
 					</button>
@@ -672,7 +672,9 @@
 								<User size={16} class="text-gray-400 dark:text-gray-500" />
 								<span class="flex-1 text-sm font-medium text-gray-900 dark:text-white">{name}</span>
 								{#if currentProfile === name}
-									<span class="text-xs font-medium text-blue-600 dark:text-blue-400">Active</span>
+									<span class="text-xs font-medium text-orange-600 dark:text-orange-400"
+										>Active</span
+									>
 								{/if}
 								<div class="flex gap-1">
 									{#if currentProfile !== name}
@@ -896,7 +898,7 @@
 			<div class="mt-6 flex justify-end gap-3">
 				<button
 					onclick={saveConfig}
-					class="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
+					class="rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
 				>
 					Done
 				</button>
@@ -909,7 +911,7 @@
 	.resize-handle {
 		position: absolute;
 		background: white;
-		border: 2px solid #3b82f6;
+		border: 2px solid #ff5a00;
 		width: 10px;
 		height: 10px;
 		border-radius: 50%;
@@ -918,7 +920,7 @@
 
 	:global(.dark) .resize-handle {
 		background: #1f2937;
-		border-color: #60a5fa;
+		border-color: #ff5a00;
 	}
 
 	.resize-n {
@@ -967,11 +969,11 @@
 	}
 
 	.resize-handle:hover {
-		background: #3b82f6;
+		background: #ff5a00;
 		transform: scale(1.25);
 	}
 	:global(.dark) .resize-handle:hover {
-		background: #60a5fa;
+		background: #ff5a00;
 	}
 	.resize-n:hover,
 	.resize-s:hover {

@@ -90,7 +90,7 @@
 			<p class="text-sm text-red-600 dark:text-red-400">{error}</p>
 			<button
 				onclick={fetchData}
-				class="mt-2 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+				class="mt-2 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400"
 			>
 				Retry
 			</button>

@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
 
+	import { AppClient, OpenAPI } from '$lib/api';
 	import { getPopupState } from '$lib/stores/popups.svelte';
 
 	const popups = getPopupState();
+	const client = new AppClient(OpenAPI);
 
 	let dialog = $state<HTMLDialogElement>();
 	let version = $state<string>('');
@@ -16,9 +18,9 @@
 	async function fetchVersion() {
 		loading = true;
 		try {
-			const response = await fetch('http://localhost:8000/api/version');
-			if (response.ok) {
-				version = (await response.text()).trim();
+			const res = await client.default.getVersionVersionGet();
+			if (res) {
+				version = res.trim();
 			}
 		} catch (err) {
 			console.log(err);
@@ -53,7 +55,7 @@
 
 		<!-- Modal Content -->
 		<div
-			class="relative z-10 flex w-[600px] flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-8 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900"
+			class="relative z-10 flex w-150 flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-8 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900"
 			in:scale={{ duration: 150, start: 0.96, opacity: 0 }}
 			out:scale={{ duration: 150, start: 0.96, opacity: 0 }}
 			role="dialog"
@@ -80,7 +82,7 @@
 				class="flex gap-4 text-sm pt-2 border-t border-gray-200 dark:border-neutral-700 w-full justify-center"
 			>
 				<a
-					href="https://github.com/your-repo"
+					href="https://github.com/sightsdev/sights-v2"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
@@ -88,7 +90,7 @@
 					GitHub
 				</a>
 				<a
-					href="https://docs.example.com"
+					href="https://sightsdev.github.io/docs/sights"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"

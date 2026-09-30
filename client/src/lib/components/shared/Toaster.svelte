@@ -66,7 +66,7 @@
 									class:bg-green-500={toast.data.variant === 'success'}
 									class:bg-yellow-500={toast.data.variant === 'warning'}
 									class:bg-red-500={toast.data.variant === 'error'}
-									class:bg-blue-500={!toast.data.variant}
+									class:bg-orange-500={!toast.data.variant}
 								></div>
 							</div>
 						{/snippet}

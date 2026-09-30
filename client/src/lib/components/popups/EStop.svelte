@@ -48,7 +48,7 @@
 
 		<!-- Modal Content -->
 		<div
-			class="relative z-10 flex w-[600px] flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-8 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900"
+			class="relative z-10 flex w-150 flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-8 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900"
 			in:scale={{ duration: 150, start: 0.96, opacity: 0 }}
 			out:scale={{ duration: 150, start: 0.96, opacity: 0 }}
 			role="dialog"

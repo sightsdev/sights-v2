@@ -2,9 +2,12 @@
 	import { onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 
+	import { AppClient, OpenAPI } from '$lib/api';
 	import { getPopupState } from '$lib/stores/popups.svelte';
 
 	const popups = getPopupState();
+
+	const client = new AppClient(OpenAPI);
 
 	let dialog = $state<HTMLDialogElement>();
 	let logs = $state<string>('');
@@ -21,19 +24,17 @@
 		loading = true;
 		error = null;
 		try {
-			const response = await fetch('http://localhost:8000/api/logs');
+			const res = await client.default.getLogsLogsGet();
 
-			if (!response.ok) {
-				throw new Error(`Failed to fetch logs: ${response.status}`);
+			if (!res) {
+				throw new Error(`Failed to fetch logs`);
 			}
 
-			const logText = await response.text();
-
-			if (logText.trim().startsWith('<!DOCTYPE html>') || logText.trim().startsWith('<html')) {
+			if (res.trim().startsWith('<!DOCTYPE html>') || res.trim().startsWith('<html')) {
 				throw new Error('Received HTML instead of logs');
 			}
 
-			logs = logText;
+			logs = res;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Unknown error';
 		} finally {

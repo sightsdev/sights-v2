@@ -34,7 +34,7 @@
 			'border border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-neutral-500',
 		danger:
 			'border border-red-600 dark:border-red-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-700 dark:hover:border-red-400',
-		primary: 'bg-sky-600 hover:bg-sky-700 text-white border border-transparent shadow-sm'
+		primary: 'bg-orange-600 hover:bg-orange-700 text-white border border-transparent shadow-sm'
 	};
 
 	const sizes: Record<Size, string> = {

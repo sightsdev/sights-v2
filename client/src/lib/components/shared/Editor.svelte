@@ -106,7 +106,7 @@
 		background-color: rgba(82, 139, 255, 0.3) !important;
 	}
 
-	/* Dark mode caret - slightly brighter blue */
+	/* Dark mode caret - slightly brighter orange */
 	:global(.dark .editor-wrapper textarea) {
 		caret-color: #61afef !important;
 	}
