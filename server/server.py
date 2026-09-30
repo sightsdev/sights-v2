@@ -271,7 +271,6 @@ async def get_config_file() -> dict[str, str]:
 async def list_backups() -> (
     dict[str, str | None] | dict[str, list[dict[str, str | int]] | str]
 ):
-    print(config_manager.list_backups())
     """List all backup files for the currently active config."""
     return config_manager.list_backups()
 
