@@ -51,10 +51,18 @@ def load_state() -> State:
         plugin_manager.import_plugin(path)
 
     # Drive
+    # if config["drive"]["enabled"]:
+    #     drive_plugin = plugin_manager.implementations["drive"]["plugin"]
+    #     if drive_plugin is not None:
+    #         new_state.drive = cast(Drive, drive_plugin())
+    #     else:
+    #         logger.error("Drive is enabled, but there is no drive plugin present")
     if config["drive"]["enabled"]:
         drive_plugin = plugin_manager.implementations["drive"]["plugin"]
-        if drive_plugin is not None:
-            new_state.drive = cast(Drive, drive_plugin())
+        drive_config_class = plugin_manager.implementations["drive"]["config"]
+        if drive_plugin is not None and drive_config_class is not None:
+            drive_config = drive_config_class(**config["drive"])
+            new_state.drive = cast(Drive, drive_plugin(drive_config))
         else:
             logger.error("Drive is enabled, but there is no drive plugin present")
 

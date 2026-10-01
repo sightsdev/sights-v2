@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 class ArmServoConfig(BaseModel):
     index: int
-    range_min: int
-    range_max: int
+    range_min: int | None
+    range_max: int | None
     home: int
     presets: dict[str, int] | None = None
 
@@ -21,15 +21,15 @@ class Arm(ABC):
         pass
 
     @abstractmethod
-    async def home(self):
+    async def home(self) -> None:
         pass
 
     @abstractmethod
-    async def move_preset(self, preset_name: str):
+    async def move_preset(self, preset_name: str) -> None:
         pass
 
     @abstractmethod
-    def increment_angle(self, joint: str, direction: bool, amount: float = 180 / 100):
+    def increment_angle(self, joint: str, direction: bool, amount: float = 180 / 100) -> None:
         pass
 
     @abstractmethod
