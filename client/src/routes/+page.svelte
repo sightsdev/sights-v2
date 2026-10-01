@@ -33,7 +33,6 @@
 		window.addEventListener('keydown', handleKeyDown);
 		window.addEventListener('keyup', handleKeyUp);
 
-		// Return cleanup function synchronously
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 			window.removeEventListener('keyup', handleKeyUp);
@@ -44,12 +43,12 @@
 	const pressedKeys = $state(new Set<string>());
 
 	async function handleKeyDown(e: KeyboardEvent): Promise<void> {
-		// Skip if user is typing in an input/textarea/editor
+	    // Skip if in a text input area
 		const target = e.target as HTMLElement;
 		if (
 			target.matches('input, textarea, select') ||
 			target.contentEditable === 'true' ||
-			target.closest('.editor-wrapper') // CodeMirror editor
+			target.closest('.editor-wrapper')
 		) {
 			return;
 		}
@@ -60,26 +59,26 @@
 		}
 
 		// Prevent repeating when key is held
-		if (pressedKeys.has(e.key)) return;
+		if (pressedKeys.has(e.key) && ['w', 'a', 's', 'd'].includes(e.key)) return;
 		pressedKeys.add(e.key);
 
 		// Drive controls
-		if (e.key === 'w' || e.key === 'ArrowUp') {
+		if (e.key === 'w') {
 			e.preventDefault();
 			await client.default.driveDrivePost({ speed: [$currentSpeed * 125, $currentSpeed * 125] });
-		} else if (e.key === 'a' || e.key === 'ArrowLeft') {
+		} else if (e.key === 'a') {
 			e.preventDefault();
 			await client.default.driveDrivePost({ speed: [$currentSpeed * -125, $currentSpeed * 125] });
-		} else if (e.key === 's' || e.key === 'ArrowDown') {
+		} else if (e.key === 's') {
 			e.preventDefault();
 			await client.default.driveDrivePost({
 				speed: [$currentSpeed * -125, $currentSpeed * -125]
 			});
-		} else if (e.key === 'd' || e.key === 'ArrowRight') {
+		} else if (e.key === 'd') {
 			e.preventDefault();
 			await client.default.driveDrivePost({ speed: [$currentSpeed * 125, $currentSpeed * -125] });
 		}
-		// Arm controls - Use numpad keys specifically
+		// Arm controls - numpad
 		else if (e.code === 'Numpad1') {
 			e.preventDefault();
 			await client.default.armMoveArmServoServoNamePost('SHOULDER', { direction: true });
@@ -105,7 +104,6 @@
 			e.preventDefault();
 			await client.default.armMoveArmServoServoNamePost('WRISTLR', { direction: false });
 		}
-		// Claw controls - numpad only
 		else if (e.code === 'NumpadAdd') {
 			e.preventDefault();
 			await client.default.armMoveArmServoServoNamePost('CLAW', { direction: true });
@@ -113,7 +111,6 @@
 			e.preventDefault();
 			await client.default.armMoveArmServoServoNamePost('CLAW', { direction: false });
 		}
-		// Arm home/preset - numpad only
 		else if (e.code === 'Numpad0') {
 			e.preventDefault();
 			await client.default.armHomeArmHomePost();
@@ -124,7 +121,7 @@
 	}
 
 	async function handleKeyUp(e: KeyboardEvent): Promise<void> {
-		// Skip if user is typing in an input/textarea/editor
+		// Skip if in a text input area
 		const target = e.target as HTMLElement;
 		if (
 			target.matches('input, textarea, select') ||
