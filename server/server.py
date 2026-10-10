@@ -50,7 +50,7 @@ app.mount("/", SinglePageApplication(directory="../client/build"), name="fronten
 
 
 class MoveMotorsParams(BaseModel):
-    speed: list[int]
+    speed: list[int | None]
 
 
 class MoveArmServoParams(BaseModel):
