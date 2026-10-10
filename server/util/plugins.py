@@ -35,8 +35,9 @@ class ImplementationTypes(TypedDict):
 
 class PluginManager:
     def __init__(self):
-        self.plugins_dir: Path = Path("./plugins")
-        self.current_dir: Path = Path(__file__).parents[1]
+        self.plugins_dir: Path = Path(
+            Path.home() / ".local" / "share" / "sights-v2" / "plugins"
+        )
         self.implementations: ImplementationTypes = {
             "arm": {
                 "plugin": None,
@@ -48,6 +49,10 @@ class PluginManager:
             },
             "sensor": {},
         }
+
+        if not self.plugins_dir.exists():
+            logger.warning(f"Creating plugins directory: {self.plugins_dir}")
+            self.plugins_dir.mkdir(parents=True, exist_ok=True)
 
     def find_plugins(self):
         found_plugins: list[str] = []
@@ -69,7 +74,7 @@ class PluginManager:
 
     def import_plugin(self, path: str):
         name = os.path.basename(path)
-        absolute_path = (self.current_dir / path).resolve()
+        absolute_path = (self.plugins_dir / path).resolve()
         spec: ModuleSpec | None = importlib.util.spec_from_file_location(
             name, absolute_path
         )

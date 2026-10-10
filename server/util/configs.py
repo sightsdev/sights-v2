@@ -13,16 +13,32 @@ from fastapi import HTTPException, status
 logger = logging.getLogger(__name__)
 
 LOG_FILE: Path = Path.home() / ".cache" / "sights-log.txt"
+CONF_DIR: Path = Path.home() / ".config" / "sights-v2"
 
 
 class ConfigManager:
     def __init__(self):
-        self.metadata: Path = Path("config/metadata.json")
-        self.config_dir: Path = Path("config")
-        self.backup_dir: Path = Path("config/backups")
+        self.metadata: Path = Path(f"{CONF_DIR}/metadata.json")
+        self.config_dir: Path = CONF_DIR
+        self.backup_dir: Path = Path(f"{CONF_DIR}/backups")
         self.max_backups: int = 10
-        self.default_config: str = "default.toml"
+        self.default_config: str = "Default.toml"
         self.timezone: str = tzlocal.get_localzone_name()
+
+        if not self.config_dir.exists():
+            self.config_dir.mkdir(parents=True, exist_ok=True)
+
+        if not self.metadata.exists():
+            meta_src: Path = Path("../install/metadata.json")
+            meta_des: Path = self.config_dir / "metadata.json"
+            logger.warning(f"Creating metadata file at {meta_des}")
+            _ = meta_des.write_bytes(meta_src.read_bytes())
+
+        if not Path(CONF_DIR / self.default_config).exists():
+            conf_src: Path = Path("../install/Default.toml")
+            conf_des: Path = self.config_dir / "Default.toml"
+            logger.warning(f"Creating default config at {conf_des}")
+            _ = conf_des.write_bytes(conf_src.read_bytes())
 
     def get_active_config_name(self) -> str:
         try:

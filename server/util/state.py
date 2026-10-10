@@ -9,7 +9,7 @@ from components.camera import CameraConfig, CameraParameters
 from components.drive import Drive
 from components.sensor import Sensor
 from util.configs import ConfigManager
-from util.pluginmanager import PluginManager
+from util.plugins import PluginManager
 from util.sysinfo import SystemInfo, SystemInfoConfig
 
 
