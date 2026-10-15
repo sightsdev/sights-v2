@@ -49,10 +49,3 @@ Thumbs.db
 
 # yarn
 .yarn/
-
-# SIGHTS
-/server/config/*
-!/server/config/metadata.json
-!/server/config/Default.toml
-/server/plugins/*
-!/server/plugins/random
